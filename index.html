@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Mobile DJ Mixer</title>
+    <title>Mobile DJ Mixer Pro</title>
     <style>
         :root {
             --bg-dark: #121212;
@@ -14,26 +14,22 @@
             --btn-green: #4caf50;
         }
 
-        /* VASTE LAYOUT VOOR iPHONE - GEEN SCROLLEN MOGELIJK */
+        /* VASTE LAYOUT - 100% ANTI-SCROLL VOOR iOS */
         html, body {
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            touch-action: none; 
+            overflow: hidden !important;
+            position: fixed !important;
+            width: 100%; height: 100%; margin: 0; padding: 0;
+            touch-action: none !important; /* Extreem belangrijk: stopt alle iOS gestures */
+            -webkit-user-select: none; user-select: none;
             background-color: var(--bg-dark);
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
+            color: #ffffff; display: flex; justify-content: center;
         }
 
         /* --- LOADER --- */
         #loaderOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9); z-index: 9999;
+            background: rgba(0, 0, 0, 0.95); z-index: 9999;
             display: none; flex-direction: column; align-items: center; justify-content: center;
         }
         .vinyl-record {
@@ -52,51 +48,35 @@
             background: #fff; border-radius: 50%; z-index: 2;
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        .loader-text { font-size: 18px; font-weight: bold; letter-spacing: 2px; }
+        .loader-text { font-size: 18px; font-weight: bold; letter-spacing: 2px; text-align: center; }
+        .loader-subtext { font-size: 11px; color: #888; margin-top: 10px; }
 
         /* --- MAIN LAYOUT --- */
         .app-container { 
-            width: 100%; 
-            height: 100%; 
-            max-width: 500px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
-            padding: 10px; 
-            box-sizing: border-box;
+            width: 100%; height: 100%; max-width: 500px; 
+            display: flex; flex-direction: column; gap: 10px; padding: 10px; box-sizing: border-box;
             padding-top: env(safe-area-inset-top, 10px);
             padding-bottom: env(safe-area-inset-bottom, 10px);
         }
 
         /* --- HEADER & UPLOAD --- */
-        .library-section { 
-            background: var(--deck-bg); padding: 10px; border-radius: 8px; 
-            border: 1px solid #444; flex-shrink: 0; 
-        }
+        .library-section { background: var(--deck-bg); padding: 10px; border-radius: 8px; border: 1px solid #444; flex-shrink: 0; }
         .upload-btn-wrapper { position: relative; overflow: hidden; width: 100%; margin-bottom: 8px; }
         .upload-btn-wrapper button { width: 100%; padding: 10px; background: #444; color: #fff; border: 2px solid #666; font-weight: bold; border-radius: 4px; text-transform: uppercase; }
         .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
-        
         .main-shuffle-btn { width: 100%; padding: 10px; background: #2196F3; color: #fff; border: none; font-weight: bold; border-radius: 4px; text-transform: uppercase; margin-bottom: 5px;}
         .library-status { font-size: 12px; color: #aaa; text-align: center; }
 
         /* --- DECKS --- */
         .mixer { display: flex; gap: 8px; width: 100%; flex: 1; min-height: 0; }
-        
         .deck { 
-            flex: 1; 
-            width: 50%; 
-            min-width: 0; 
-            background: var(--sl1200-panel); padding: 10px; border-radius: 6px; 
-            border: 2px solid #000; display: flex; flex-direction: column; align-items: center;
+            flex: 1; width: 50%; min-width: 0; background: var(--sl1200-panel); padding: 10px; border-radius: 6px; 
+            border: 2px solid #000; display: flex; flex-direction: column; align-items: center; justify-content: space-between; 
             box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 0 4px 8px rgba(0,0,0,0.5);
-            justify-content: space-between; 
         }
-        
         .deck-header { width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #555; padding-bottom: 5px; }
         .deck-header h2 { margin: 0; font-size: 14px; color: #ccc; }
         .mini-shuffle { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 4px 8px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-
         .track-info { background: #000; width: 100%; padding: 6px; box-sizing: border-box; text-align: center; border: 1px solid #222; border-radius: 2px; overflow: hidden; }
         .track-name { font-size: 10px; color: #00e5ff; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
 
@@ -106,78 +86,48 @@
             width: 55px; height: 55px; border-radius: 50%; border: 3px solid #111;
             font-weight: bold; font-size: 12px; color: #fff;
             box-shadow: 0 4px 6px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.3);
-            display: flex; align-items: center; justify-content: center;
-            touch-action: manipulation; 
+            display: flex; align-items: center; justify-content: center; touch-action: none; 
         }
-        .round-btn:active { transform: translateY(2px); box-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+        .round-btn:active, .round-btn.pressed { transform: translateY(2px); box-shadow: 0 1px 2px rgba(0,0,0,0.6); }
         .btn-cue { background: radial-gradient(circle at 50% 20%, #ffa733, var(--btn-orange)); }
         .btn-play { background: radial-gradient(circle at 50% 20%, #6fdf73, var(--btn-green)); }
-        .btn-play.active { box-shadow: 0 0 15px var(--led-green); }
+        .btn-play.active { box-shadow: 0 0 15px var(--led-green); border-color: #fff;}
 
-        /* --- PITCH FADER (SL-1200 STYLE) --- */
+        /* --- NIEUWE CUSTOM PITCH FADER (Oplossing voor de audio bug) --- */
         .pitch-section {
             background: #111; border: 1px solid #000; border-radius: 4px; padding: 10px 5px;
             display: flex; align-items: center; justify-content: center; height: 180px; width: 100%; box-sizing: border-box;
             box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
         }
-
         .pitch-scale {
             display: flex; flex-direction: column; justify-content: space-between; height: 100%; 
-            font-size: 9px; color: #aaa; text-align: right; margin-right: 8px; font-family: monospace;
+            font-size: 9px; color: #aaa; text-align: right; margin-right: 12px; font-family: monospace;
         }
         .pitch-scale span { display: flex; align-items: center; justify-content: flex-end; line-height: 1;}
-        
         .zero-marker { color: #fff; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 4px;}
         .led { width: 6px; height: 6px; border-radius: 50%; background: #222; border: 1px solid #000; }
         .led.on { background: var(--led-green); box-shadow: 0 0 8px var(--led-green); border-color: #fff; }
 
-        .pitch-slider-wrapper { height: 100%; display: flex; justify-content: center; width: 35px; position: relative;}
-        
-        input[type=range].pitch-fader {
-            -webkit-appearance: none; 
-            writing-mode: vertical-lr; 
-            direction: rtl; 
-            width: 30px; 
-            height: 100%; 
-            margin: 0; 
-            outline: none; 
-            background: transparent;
-            position: relative;
-            /* CRUCIAAL VOOR iOS: Voorkomt dat Safari het schuiven aanziet voor scrollen en audio stopt */
-            touch-action: none; 
+        /* De Slider zelf gebouwd in CSS (Geen input tag meer) */
+        .custom-fader-container { position: relative; height: 100%; width: 35px; touch-action: none; cursor: pointer; }
+        .custom-fader-track {
+            position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: #000;
+            border: 1px solid #222; border-radius: 2px; box-shadow: inset 0 1px 3px rgba(0,0,0,1);
+            transform: translateX(-50%); pointer-events: none;
         }
-
-        input[type=range].pitch-fader::-webkit-slider-runnable-track {
-            width: 4px;
-            background: #000;
-            border: 1px solid #222;
-            border-radius: 2px;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,1);
-        }
-
-        input[type=range].pitch-fader::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 35px; 
-            height: 16px; 
-            border-radius: 2px;
-            background-color: #ccc;
-            background-image: 
-                linear-gradient(to bottom, transparent 45%, #000 45%, #000 55%, transparent 55%),
-                linear-gradient(to right, #666 0%, #eee 50%, #666 100%);
-            border: 1px solid #111;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.6);
-            margin-left: -15px; 
+        .custom-fader-thumb {
+            position: absolute; left: 0; width: 35px; height: 16px; top: 50%; transform: translateY(-50%);
+            border-radius: 2px; background-color: #ccc;
+            background-image: linear-gradient(to bottom, transparent 45%, #000 45%, #000 55%, transparent 55%), linear-gradient(to right, #666 0%, #eee 50%, #666 100%);
+            border: 1px solid #111; box-shadow: 0 4px 6px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.6);
+            pointer-events: none; /* Events worden door de container gevangen */
         }
 
         .pitch-display { font-family: monospace; font-size: 11px; color: var(--led-green); background: #000; padding: 4px; border: 1px solid #333; width: 100%; text-align: center; box-sizing: border-box;}
 
         /* --- BPM CHECK OVERLAY --- */
         .check-btn { width: 100%; padding: 12px; background: #607d8b; color: #fff; border: none; font-weight: bold; border-radius: 4px; text-transform: uppercase; font-size: 16px; flex-shrink: 0;}
-        
-        #bpmModal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95);
-            display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9000; padding: 15px; box-sizing: border-box;
-        }
+        #bpmModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9000; padding: 15px; box-sizing: border-box; }
         .bpm-card { background: var(--deck-bg); border: 2px solid #555; border-radius: 8px; padding: 20px; width: 100%; max-width: 400px; }
         .bpm-card h2 { margin-top: 0; text-align: center; color: #fff; border-bottom: 1px solid #444; padding-bottom: 10px;}
         .bpm-result-row { margin-bottom: 15px; background: #000; padding: 10px; border-radius: 4px; border: 1px solid #222; overflow: hidden;}
@@ -185,14 +135,14 @@
         .bpm-stats { font-size: 14px; color: #ccc; font-family: monospace; display: flex; justify-content: space-between;}
         .bpm-stats span.current { color: var(--led-green); font-weight: bold;}
         .close-modal { width: 100%; padding: 12px; background: #444; color: #fff; border: none; font-weight: bold; border-radius: 4px; margin-top: 10px; text-transform: uppercase;}
-
     </style>
 </head>
 <body>
 
     <div id="loaderOverlay">
         <div class="vinyl-record"></div>
-        <div class="loader-text">Laden<span id="dots">...</span></div>
+        <div class="loader-text">Bestanden verwerken<span id="dots">...</span></div>
+        <div class="loader-subtext">Let op: Laat Safari open, dit duurt even.</div>
     </div>
 
     <div id="bpmModal">
@@ -213,23 +163,27 @@
     </div>
 
     <div class="app-container">
+        <!-- HEADER / BESTANDEN INLADEN -->
         <div class="library-section">
             <div class="upload-btn-wrapper">
                 <button>Selecteer bestanden</button>
                 <input type="file" id="fileUpload" accept=".mp3, .flac, audio/mpeg, audio/flac" multiple>
             </div>
-            <button class="main-shuffle-btn" id="shuffleAllBtn">Shuffle</button>
+            <button class="main-shuffle-btn" id="shuffleAllBtn">Shuffle Alles</button>
             <div class="library-status" id="libStatus">0 bestanden ingeladen</div>
         </div>
 
+        <!-- MIXER / DECKS -->
         <div class="mixer">
+            <!-- CHANNEL 1 -->
             <div class="deck" id="deck1">
                 <div class="deck-header">
                     <h2>CH 1</h2>
-                    <button class="mini-shuffle" id="shuffle1Btn">Shuffle</button>
+                    <button class="mini-shuffle" id="shuffle1Btn">Shuff</button>
                 </div>
                 <div class="track-info"><div class="track-name" id="title1">Geen track</div></div>
-                <audio id="audio1"></audio>
+                <!-- HTML5 Audio Elementen -->
+                <audio id="audio1" preload="auto"></audio>
                 
                 <div class="controls">
                     <button class="round-btn btn-cue" id="cue1Btn">CUE</button>
@@ -242,20 +196,23 @@
                         <span class="zero-marker"><span class="led on" id="led1"></span> - </span>
                         <span>-2</span><span>-4</span><span>-6</span><span>-8</span>
                     </div>
-                    <div class="pitch-slider-wrapper">
-                        <input type="range" class="pitch-fader" id="pitch1" min="0.92" max="1.08" step="0.0005" value="1" orient="vertical">
+                    <!-- De nieuwe Custom Fader (Geen <input> meer!) -->
+                    <div class="custom-fader-container" id="faderContainer1">
+                        <div class="custom-fader-track"></div>
+                        <div class="custom-fader-thumb" id="faderThumb1"></div>
                     </div>
                 </div>
                 <div class="pitch-display" id="pitchVal1">0.00%</div>
             </div>
 
+            <!-- CHANNEL 2 -->
             <div class="deck" id="deck2">
                 <div class="deck-header">
                     <h2>CH 2</h2>
-                    <button class="mini-shuffle" id="shuffle2Btn">Shuffle</button>
+                    <button class="mini-shuffle" id="shuffle2Btn">Shuff</button>
                 </div>
                 <div class="track-info"><div class="track-name" id="title2">Geen track</div></div>
-                <audio id="audio2"></audio>
+                <audio id="audio2" preload="auto"></audio>
                 
                 <div class="controls">
                     <button class="round-btn btn-cue" id="cue2Btn">CUE</button>
@@ -268,8 +225,9 @@
                         <span class="zero-marker"><span class="led on" id="led2"></span> - </span>
                         <span>-2</span><span>-4</span><span>-6</span><span>-8</span>
                     </div>
-                    <div class="pitch-slider-wrapper">
-                        <input type="range" class="pitch-fader" id="pitch2" min="0.92" max="1.08" step="0.0005" value="1" orient="vertical">
+                    <div class="custom-fader-container" id="faderContainer2">
+                        <div class="custom-fader-track"></div>
+                        <div class="custom-fader-thumb" id="faderThumb2"></div>
                     </div>
                 </div>
                 <div class="pitch-display" id="pitchVal2">0.00%</div>
@@ -282,10 +240,25 @@
 <script>
     let library = [];
     const deckData = {
-        1: { bpm: 0, firstKick: 0 },
-        2: { bpm: 0, firstKick: 0 }
+        1: { bpm: 0, firstKick: 0, rate: 1 },
+        2: { bpm: 0, firstKick: 0, rate: 1 }
     };
     
+    // --- iOS AUDIO UNLOCKER ---
+    // Dit zorgt ervoor dat Apple direct vanaf je eerste touch toestaat dat de app geluid maakt.
+    let audioUnlocked = false;
+    function unlockAudio() {
+        if(audioUnlocked) return;
+        ['audio1', 'audio2'].forEach(id => {
+            let el = document.getElementById(id);
+            el.play().then(() => el.pause()).catch(e => {}); // Speelt stil en pauzeert
+        });
+        audioUnlocked = true;
+        document.body.removeEventListener('touchstart', unlockAudio);
+    }
+    document.body.addEventListener('touchstart', unlockAudio, {once:true});
+
+    // --- LOADER ---
     let dotInterval;
     function showLoader(show) {
         const overlay = document.getElementById('loaderOverlay');
@@ -303,21 +276,26 @@
         }
     }
 
+    // --- UPLOAD & ANALYSE ---
     document.getElementById('fileUpload').addEventListener('change', async function(e) {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
-        
         showLoader(true);
+        
+        // Zorg dat Safari audio niet in slaap laat vallen
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         const ctx = new AudioContext();
 
         for (let file of files) {
             try {
                 const arrayBuffer = await file.arrayBuffer();
-                const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+                let audioBuffer = await ctx.decodeAudioData(arrayBuffer);
                 
                 const bpm = await accurateBPMAnalyze(audioBuffer);
                 const firstKick = findFirstKick(audioBuffer);
+                
+                // RAM-geheugen direct weer vrijgeven (Voorkomt crashen met zware FLACs)
+                audioBuffer = null; 
                 
                 library.push({ file: file, name: file.name, bpm: Math.round(bpm), firstKick: firstKick });
             } catch (err) {
@@ -333,14 +311,11 @@
         const OfflineCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
         const duration = Math.min(audioBuffer.duration, 45); 
         const offlineCtx = new OfflineCtx(1, duration * audioBuffer.sampleRate, audioBuffer.sampleRate);
-        
         const source = offlineCtx.createBufferSource();
         source.buffer = audioBuffer;
-        
         const filter = offlineCtx.createBiquadFilter();
         filter.type = "lowpass"; 
         filter.frequency.value = 130; 
-        
         source.connect(filter); 
         filter.connect(offlineCtx.destination);
         source.start(0);
@@ -353,7 +328,6 @@
             if (Math.abs(data[i]) > maxVol) maxVol = Math.abs(data[i]);
         }
         const threshold = maxVol * 0.45; 
-        
         let peaks = [];
         for (let i = 0; i < data.length; i++) {
             if (data[i] > threshold) {
@@ -361,53 +335,38 @@
                 i += Math.floor(audioBuffer.sampleRate / 4); 
             }
         }
-        
         let intervals = {};
         for (let i = 0; i < peaks.length; i++) {
             for (let j = 1; j < 5 && (i + j) < peaks.length; j++) {
                 let intervalSamples = peaks[i + j] - peaks[i];
                 let tempo = 60 / (intervalSamples / audioBuffer.sampleRate);
-                
                 while (tempo < 90) tempo *= 2;
                 while (tempo > 180) tempo /= 2;
-                
                 let roundedTempo = Math.round(tempo);
                 intervals[roundedTempo] = (intervals[roundedTempo] || 0) + 1;
             }
         }
-        
         let bestBPM = 120;
         let maxCount = 0;
         for (const bpm in intervals) {
-            if (intervals[bpm] > maxCount) {
-                maxCount = intervals[bpm];
-                bestBPM = parseInt(bpm);
-            }
+            if (intervals[bpm] > maxCount) { maxCount = intervals[bpm]; bestBPM = parseInt(bpm); }
         }
-        
         return bestBPM;
     }
 
     function findFirstKick(audioBuffer) {
         const data = audioBuffer.getChannelData(0);
         let maxPeak = 0;
-        
         const scanLimit = Math.min(data.length, audioBuffer.sampleRate * 5);
-        for (let i = 0; i < scanLimit; i += 50) { 
-            if (Math.abs(data[i]) > maxPeak) maxPeak = Math.abs(data[i]); 
-        }
-        
+        for (let i = 0; i < scanLimit; i += 50) { if (Math.abs(data[i]) > maxPeak) maxPeak = Math.abs(data[i]); }
         const threshold = maxPeak * 0.4; 
-        
         for (let i = 0; i < scanLimit; i++) {
-            if (Math.abs(data[i]) > threshold) {
-                let exactStart = (i / audioBuffer.sampleRate) - 0.03;
-                return Math.max(0, exactStart);
-            }
+            if (Math.abs(data[i]) > threshold) return Math.max(0, (i / audioBuffer.sampleRate) - 0.03);
         }
         return 0;
     }
 
+    // --- SHUFFLE & INLADEN ---
     function getRandomTrack() {
         if (library.length === 0) return null;
         return library[Math.floor(Math.random() * library.length)];
@@ -418,7 +377,6 @@
         let t1 = getRandomTrack();
         let t2 = getRandomTrack();
         while (t1 === t2 && library.length > 1) t2 = getRandomTrack();
-        
         loadToDeck(1, t1);
         loadToDeck(2, t2);
     }
@@ -433,67 +391,99 @@
         audio.pause();
         document.getElementById('play' + deckNum + 'Btn').classList.remove('active');
         
-        const fader = document.getElementById('pitch' + deckNum);
-        fader.value = 1;
-        updatePitchDisplay(deckNum, 1);
+        // Reset Custom Slider
+        document.getElementById('faderThumb' + deckNum).style.top = '50%';
+        applyPitch(deckNum, 1);
         
         document.getElementById('title' + deckNum).innerText = trackObj.name;
         audio.src = URL.createObjectURL(trackObj.file);
         
-        // DE APPLE / iOS FIXES VOOR PITCH
+        // Dwingt iOS om de snelheid te veranderen zonder robot-stem
         audio.preservesPitch = false; 
         audio.webkitPreservesPitch = false; 
-        audio.mozPreservesPitch = false;
         
         deckData[deckNum].bpm = trackObj.bpm;
         deckData[deckNum].firstKick = trackObj.firstKick;
-        
         audio.currentTime = trackObj.firstKick;
     }
 
-    // --- GEOPTIMALISEERDE DECK CONTROLS (VOORKOMT AUDIO UITVAL) ---
+    // --- NIEUWE CUSTOM FADER LOGICA ---
+    // Dit vervangt de oude <input type="range"> en crasht iOS audio NIET
     [1, 2].forEach(deck => {
-        const fader = document.getElementById('pitch' + deck);
-        let animationFrameId = null; // Zorgt voor gecontroleerde snelheidsupdates
-        
-        fader.addEventListener('input', function(e) {
-            let val = parseFloat(e.target.value);
-            if (val > 0.998 && val < 1.002) val = 1; 
-            fader.value = val;
+        const container = document.getElementById('faderContainer' + deck);
+        const thumb = document.getElementById('faderThumb' + deck);
+        let isDragging = false;
+        let lastAudioUpdate = 0;
+
+        function updateFader(e) {
+            e.preventDefault(); // Stop iOS scroll
+            const rect = container.getBoundingClientRect();
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            let y = clientY - rect.top;
             
-            updatePitchDisplay(deck, val); // De tekst verandert direct
+            if (y < 0) y = 0;
+            if (y > rect.height) y = rect.height;
             
-            const audio = document.getElementById('audio' + deck);
-            if(audio.src) {
-                // Hier remmen we de iOS audio motor af zodat deze niet oververhit raakt
-                if (animationFrameId) cancelAnimationFrame(animationFrameId);
-                animationFrameId = requestAnimationFrame(() => {
-                    audio.playbackRate = val;
-                });
+            const percent = y / rect.height; // 0.0 tot 1.0
+            
+            // 0 is boven (sneller, +8%), rect.height is beneden (langzamer, -8%)
+            let val = 1.08 - (percent * 0.16);
+            
+            // Magnetisch vastklikken op precies nul
+            if (val > 0.998 && val < 1.002) {
+                val = 1;
+                thumb.style.top = '50%';
+            } else {
+                thumb.style.top = (percent * 100) + '%';
             }
-        });
+            
+            // Throttle de update naar de HTML5 audio element om haperen te voorkomen (max 25x per seconde)
+            const now = Date.now();
+            if (now - lastAudioUpdate > 40) {
+                applyPitch(deck, val);
+                lastAudioUpdate = now;
+            }
+        }
+
+        container.addEventListener('touchstart', (e) => { isDragging = true; updateFader(e); }, {passive: false});
+        container.addEventListener('touchmove', (e) => { if(isDragging) updateFader(e); }, {passive: false});
+        container.addEventListener('touchend', () => { isDragging = false; });
         
-        fader.addEventListener('dblclick', function() {
-            fader.value = 1;
-            document.getElementById('audio' + deck).playbackRate = 1;
-            updatePitchDisplay(deck, 1);
+        // Dubbelklik op fader zet hem terug naar nul
+        container.addEventListener('dblclick', () => {
+            thumb.style.top = '50%';
+            applyPitch(deck, 1);
         });
+
+        // Voor testen op desktop met muis
+        container.addEventListener('mousedown', (e) => { isDragging = true; updateFader(e); });
+        document.addEventListener('mousemove', (e) => { if(isDragging) updateFader(e); });
+        document.addEventListener('mouseup', () => { isDragging = false; });
         
+        // Play reset als liedje af is
         document.getElementById('audio' + deck).addEventListener('ended', () => {
             document.getElementById('play' + deck + 'Btn').classList.remove('active');
         });
     });
 
-    function updatePitchDisplay(deck, val) {
+    function applyPitch(deck, val) {
+        deckData[deck].rate = val;
         const percentage = ((val - 1) * 100).toFixed(2);
         document.getElementById('pitchVal' + deck).innerText = (percentage > 0 ? '+' : '') + percentage + '%';
         
         const led = document.getElementById('led' + deck);
         if (val === 1) led.classList.add('on');
         else led.classList.remove('on');
+        
+        const audio = document.getElementById('audio' + deck);
+        if (audio.src) {
+            audio.playbackRate = val;
+        }
     }
 
+    // --- PLAY & CUE (MULTI-TOUCH) ---
     function togglePlay(deck) {
+        if(!audioUnlocked) unlockAudio();
         const audio = document.getElementById('audio' + deck);
         const btn = document.getElementById('play' + deck + 'Btn');
         if (!audio.src) return;
@@ -508,6 +498,7 @@
     }
 
     function handleCue(deck) {
+        if(!audioUnlocked) unlockAudio();
         const audio = document.getElementById('audio' + deck);
         const btnPlay = document.getElementById('play' + deck + 'Btn');
         if (!audio.src) return;
@@ -517,10 +508,25 @@
         audio.currentTime = deckData[deck].firstKick; 
     }
 
+    function bindMultiTouch(id, actionCallback) {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        const handler = function(e) {
+            e.preventDefault(); 
+            // Voeg korte visuele feedback toe (geen CSS active, vanwege JS override)
+            btn.classList.add('pressed');
+            setTimeout(() => btn.classList.remove('pressed'), 100);
+            actionCallback();
+        };
+        btn.addEventListener('touchstart', handler, {passive: false});
+        btn.addEventListener('mousedown', handler); 
+    }
+
+    // --- BPM CONTROLE ---
     function checkBPM() {
         const modal = document.getElementById('bpmModal');
         [1, 2].forEach(deck => {
-            const faderVal = parseFloat(document.getElementById('pitch' + deck).value);
+            const faderVal = deckData[deck].rate;
             const origBPM = deckData[deck].bpm;
             
             document.getElementById('checkTitle' + deck).innerText = document.getElementById('title' + deck).innerText;
@@ -536,19 +542,6 @@
         modal.style.display = 'flex';
     }
 
-    function bindMultiTouch(id, actionCallback) {
-        const btn = document.getElementById(id);
-        if (!btn) return;
-        
-        const handler = function(e) {
-            e.preventDefault(); 
-            actionCallback();
-        };
-
-        btn.addEventListener('touchstart', handler, {passive: false});
-        btn.addEventListener('mousedown', handler); 
-    }
-
     document.addEventListener("DOMContentLoaded", () => {
         bindMultiTouch('play1Btn', () => togglePlay(1));
         bindMultiTouch('cue1Btn', () => handleCue(1));
@@ -560,7 +553,6 @@
         bindMultiTouch('checkBpmBtn', () => checkBPM());
         bindMultiTouch('closeBpmBtn', () => { document.getElementById('bpmModal').style.display='none'; });
     });
-
 </script>
 </body>
 </html>
