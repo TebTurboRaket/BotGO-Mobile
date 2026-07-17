@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mobile DJ Mixer</title>
     <style>
         :root {
@@ -14,17 +14,20 @@
             --btn-green: #4caf50;
         }
 
-        body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: var(--bg-dark);
-            color: #ffffff;
+        /* VASTE LAYOUT VOOR iPHONE - GEEN SCROLLEN MOGELIJK */
+        html, body {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
             margin: 0;
-            padding: 10px;
+            padding: 0;
+            touch-action: none; /* Blokkeert al het scrollen en bouncen op iOS */
+            background-color: var(--bg-dark);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #ffffff;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
-            touch-action: manipulation;
+            justify-content: center;
         }
 
         /* --- LOADER --- */
@@ -52,43 +55,61 @@
         .loader-text { font-size: 18px; font-weight: bold; letter-spacing: 2px; }
 
         /* --- MAIN LAYOUT --- */
-        .app-container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; }
+        .app-container { 
+            width: 100%; 
+            height: 100%; 
+            max-width: 500px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            padding: 10px; 
+            box-sizing: border-box;
+            /* Zorgt dat elementen veilig wegblijven van de iPhone notch/home-indicator */
+            padding-top: env(safe-area-inset-top, 10px);
+            padding-bottom: env(safe-area-inset-bottom, 10px);
+        }
 
         /* --- HEADER & UPLOAD --- */
-        .library-section { background: var(--deck-bg); padding: 15px; border-radius: 8px; border: 1px solid #444; }
-        .upload-btn-wrapper { position: relative; overflow: hidden; width: 100%; margin-bottom: 10px; }
-        .upload-btn-wrapper button { width: 100%; padding: 12px; background: #444; color: #fff; border: 2px solid #666; font-weight: bold; border-radius: 4px; text-transform: uppercase; }
+        .library-section { 
+            background: var(--deck-bg); padding: 10px; border-radius: 8px; 
+            border: 1px solid #444; flex-shrink: 0; 
+        }
+        .upload-btn-wrapper { position: relative; overflow: hidden; width: 100%; margin-bottom: 8px; }
+        .upload-btn-wrapper button { width: 100%; padding: 10px; background: #444; color: #fff; border: 2px solid #666; font-weight: bold; border-radius: 4px; text-transform: uppercase; }
         .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
         
-        .main-shuffle-btn { width: 100%; padding: 12px; background: #2196F3; color: #fff; border: none; font-weight: bold; border-radius: 4px; text-transform: uppercase; margin-bottom: 5px;}
+        .main-shuffle-btn { width: 100%; padding: 10px; background: #2196F3; color: #fff; border: none; font-weight: bold; border-radius: 4px; text-transform: uppercase; margin-bottom: 5px;}
         .library-status { font-size: 12px; color: #aaa; text-align: center; }
 
         /* --- DECKS --- */
-        .mixer { display: flex; gap: 8px; width: 100%; }
+        .mixer { display: flex; gap: 8px; width: 100%; flex: 1; min-height: 0; }
         
         .deck { 
             flex: 1; 
-            width: 50%; /* Forceert layout breedte */
-            min-width: 0; /* Belangrijk: voorkomt dat lange tekst de flexbox oprekt */
+            width: 50%; 
+            min-width: 0; 
             background: var(--sl1200-panel); padding: 10px; border-radius: 6px; 
             border: 2px solid #000; display: flex; flex-direction: column; align-items: center;
             box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 0 4px 8px rgba(0,0,0,0.5);
+            justify-content: space-between; /* Rekt deck uit over hele lengte */
         }
         
-        .deck-header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #555; padding-bottom: 5px; }
+        .deck-header { width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #555; padding-bottom: 5px; }
         .deck-header h2 { margin: 0; font-size: 14px; color: #ccc; }
-        .mini-shuffle { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 4px 8px; font-size: 10px; font-weight: bold; text-transform: uppercase; cursor: pointer; }
+        .mini-shuffle { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 4px 8px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
 
-        .track-info { background: #000; width: 100%; padding: 6px; box-sizing: border-box; text-align: center; margin-bottom: 15px; border: 1px solid #222; border-radius: 2px; overflow: hidden; }
+        .track-info { background: #000; width: 100%; padding: 6px; box-sizing: border-box; text-align: center; border: 1px solid #222; border-radius: 2px; overflow: hidden; }
         .track-name { font-size: 10px; color: #00e5ff; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
 
         /* --- CUE & PLAY BUTTONS --- */
-        .controls { display: flex; gap: 15px; margin-bottom: 15px; }
+        .controls { display: flex; gap: 12px; }
         .round-btn { 
             width: 55px; height: 55px; border-radius: 50%; border: 3px solid #111;
-            font-weight: bold; font-size: 12px; color: #fff; cursor: pointer;
+            font-weight: bold; font-size: 12px; color: #fff;
             box-shadow: 0 4px 6px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.3);
             display: flex; align-items: center; justify-content: center;
+            /* touch-action auto nodig voor knoppen i.c.m. Javascript events */
+            touch-action: manipulation; 
         }
         .round-btn:active { transform: translateY(2px); box-shadow: 0 1px 2px rgba(0,0,0,0.6); }
         .btn-cue { background: radial-gradient(circle at 50% 20%, #ffa733, var(--btn-orange)); }
@@ -114,11 +135,10 @@
 
         .pitch-slider-wrapper { height: 100%; display: flex; justify-content: center; width: 35px; position: relative;}
         
-        /* De native fader is vervangen door een volledig te stylen versie */
         input[type=range].pitch-fader {
             -webkit-appearance: none; 
-            writing-mode: vertical-lr; /* Verticaal maken */
-            direction: rtl; /* + boven, - beneden */
+            writing-mode: vertical-lr; 
+            direction: rtl; 
             width: 30px; 
             height: 100%; 
             margin: 0; 
@@ -127,7 +147,6 @@
             position: relative;
         }
 
-        /* De gleuf (track) van de fader */
         input[type=range].pitch-fader::-webkit-slider-runnable-track {
             width: 4px;
             background: #000;
@@ -136,35 +155,24 @@
             box-shadow: inset 0 1px 3px rgba(0,0,0,1);
         }
 
-        /* De Realistische SL-1200 Knop */
         input[type=range].pitch-fader::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 35px;  /* Brede knop */
-            height: 16px; /* Smalle hoogte */
+            width: 35px; 
+            height: 16px; 
             border-radius: 2px;
             background-color: #ccc;
-            /* Zwarte streep in het midden + zilver gradient */
             background-image: 
                 linear-gradient(to bottom, transparent 45%, #000 45%, #000 55%, transparent 55%),
                 linear-gradient(to right, #666 0%, #eee 50%, #666 100%);
             border: 1px solid #111;
             box-shadow: 0 4px 6px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.6);
-            cursor: pointer;
-            margin-left: -15px; /* Centreert de knop over de gleuf */
+            margin-left: -15px; 
         }
 
-        /* Voor Firefox support */
-        input[type=range].pitch-fader::-moz-range-track { width: 4px; background: #000; }
-        input[type=range].pitch-fader::-moz-range-thumb {
-            width: 35px; height: 16px; border-radius: 2px;
-            background-image: linear-gradient(to bottom, transparent 45%, #000 45%, #000 55%, transparent 55%), linear-gradient(to right, #666 0%, #eee 50%, #666 100%);
-            border: 1px solid #111; box-shadow: 0 4px 6px rgba(0,0,0,0.8); cursor: pointer;
-        }
-
-        .pitch-display { font-family: monospace; font-size: 11px; color: var(--led-green); background: #000; padding: 4px; margin-top: 10px; border: 1px solid #333; width: 100%; text-align: center; box-sizing: border-box;}
+        .pitch-display { font-family: monospace; font-size: 11px; color: var(--led-green); background: #000; padding: 4px; border: 1px solid #333; width: 100%; text-align: center; box-sizing: border-box;}
 
         /* --- BPM CHECK OVERLAY --- */
-        .check-btn { width: 100%; padding: 15px; background: #607d8b; color: #fff; border: none; font-weight: bold; border-radius: 4px; text-transform: uppercase; font-size: 16px; margin-top: 10px;}
+        .check-btn { width: 100%; padding: 12px; background: #607d8b; color: #fff; border: none; font-weight: bold; border-radius: 4px; text-transform: uppercase; font-size: 16px; flex-shrink: 0;}
         
         #bpmModal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95);
@@ -202,7 +210,7 @@
                 <div class="bpm-stats">Origineel: <span id="checkOrig2">--</span></div>
                 <div class="bpm-stats">Huidig: <span class="current" id="checkCur2">--</span></div>
             </div>
-            <button class="close-modal" onclick="document.getElementById('bpmModal').style.display='none'">Sluiten</button>
+            <button class="close-modal" id="closeBpmBtn">Sluiten</button>
         </div>
     </div>
 
@@ -213,7 +221,7 @@
                 <button>Selecteer bestanden</button>
                 <input type="file" id="fileUpload" accept=".mp3, .flac, audio/mpeg, audio/flac" multiple>
             </div>
-            <button class="main-shuffle-btn" onclick="shuffleAll()">Shuffle</button>
+            <button class="main-shuffle-btn" id="shuffleAllBtn">Shuffle</button>
             <div class="library-status" id="libStatus">0 bestanden ingeladen</div>
         </div>
 
@@ -223,14 +231,15 @@
             <div class="deck" id="deck1">
                 <div class="deck-header">
                     <h2>CH 1</h2>
-                    <button class="mini-shuffle" onclick="shuffleDeck(1)">Shuffle</button>
+                    <button class="mini-shuffle" id="shuffle1Btn">Shuffle</button>
                 </div>
                 <div class="track-info"><div class="track-name" id="title1">Geen track</div></div>
                 <audio id="audio1"></audio>
                 
                 <div class="controls">
-                    <button class="round-btn btn-cue" onclick="handleCue(1)">CUE</button>
-                    <button class="round-btn btn-play" id="play1" onclick="togglePlay(1)">PLAY</button>
+                    <!-- Javascript touch events worden hieraan gekoppeld -->
+                    <button class="round-btn btn-cue" id="cue1Btn">CUE</button>
+                    <button class="round-btn btn-play" id="play1Btn">PLAY</button>
                 </div>
 
                 <div class="pitch-section">
@@ -250,14 +259,15 @@
             <div class="deck" id="deck2">
                 <div class="deck-header">
                     <h2>CH 2</h2>
-                    <button class="mini-shuffle" onclick="shuffleDeck(2)">Shuffle</button>
+                    <button class="mini-shuffle" id="shuffle2Btn">Shuffle</button>
                 </div>
                 <div class="track-info"><div class="track-name" id="title2">Geen track</div></div>
                 <audio id="audio2"></audio>
                 
                 <div class="controls">
-                    <button class="round-btn btn-cue" onclick="handleCue(2)">CUE</button>
-                    <button class="round-btn btn-play" id="play2" onclick="togglePlay(2)">PLAY</button>
+                    <!-- Javascript touch events worden hieraan gekoppeld -->
+                    <button class="round-btn btn-cue" id="cue2Btn">CUE</button>
+                    <button class="round-btn btn-play" id="play2Btn">PLAY</button>
                 </div>
 
                 <div class="pitch-section">
@@ -274,7 +284,7 @@
             </div>
         </div>
 
-        <button class="check-btn" onclick="checkBPM()">Controleer BPM</button>
+        <button class="check-btn" id="checkBpmBtn">Controleer BPM</button>
     </div>
 
 <script>
@@ -317,7 +327,6 @@
                 const arrayBuffer = await file.arrayBuffer();
                 const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
                 
-                // Verbeterde en nauwkeurige BPM analyse
                 const bpm = await accurateBPMAnalyze(audioBuffer);
                 const firstKick = findFirstKick(audioBuffer);
                 
@@ -331,16 +340,15 @@
         showLoader(false);
     });
 
-    // --- NAUWKEURIGE BPM DETECTIE (Histogram Methode) ---
+    // --- NAUWKEURIGE BPM DETECTIE ---
     async function accurateBPMAnalyze(audioBuffer) {
         const OfflineCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-        const duration = Math.min(audioBuffer.duration, 45); // Check de eerste 45 seconden voor precisie
+        const duration = Math.min(audioBuffer.duration, 45); 
         const offlineCtx = new OfflineCtx(1, duration * audioBuffer.sampleRate, audioBuffer.sampleRate);
         
         const source = offlineCtx.createBufferSource();
         source.buffer = audioBuffer;
         
-        // Lowpass filter isoleert de bass en kicks
         const filter = offlineCtx.createBiquadFilter();
         filter.type = "lowpass"; 
         filter.frequency.value = 130; 
@@ -352,29 +360,26 @@
         const renderedBuffer = await offlineCtx.startRendering();
         const data = renderedBuffer.getChannelData(0);
         
-        // Zoek de hoogste piek om de drempel (threshold) in te stellen
         let maxVol = 0;
         for (let i = 0; i < data.length; i++) {
             if (Math.abs(data[i]) > maxVol) maxVol = Math.abs(data[i]);
         }
-        const threshold = maxVol * 0.45; // Adaptieve drempel
+        const threshold = maxVol * 0.45; 
         
         let peaks = [];
         for (let i = 0; i < data.length; i++) {
             if (data[i] > threshold) {
                 peaks.push(i);
-                i += Math.floor(audioBuffer.sampleRate / 4); // Sla kwart seconde over (voorkomt dubbele kicks)
+                i += Math.floor(audioBuffer.sampleRate / 4); 
             }
         }
         
-        // Vergelijk intervallen (afstand tussen kicks) om ritme te vinden
         let intervals = {};
         for (let i = 0; i < peaks.length; i++) {
             for (let j = 1; j < 5 && (i + j) < peaks.length; j++) {
                 let intervalSamples = peaks[i + j] - peaks[i];
                 let tempo = 60 / (intervalSamples / audioBuffer.sampleRate);
                 
-                // Zorg dat het tempo binnen DJ grenzen valt
                 while (tempo < 90) tempo *= 2;
                 while (tempo > 180) tempo /= 2;
                 
@@ -383,7 +388,6 @@
             }
         }
         
-        // Vind het tempo met de meeste overeenkomsten (histogram piek)
         let bestBPM = 120;
         let maxCount = 0;
         for (const bpm in intervals) {
@@ -396,15 +400,26 @@
         return bestBPM;
     }
 
-    // Zoek de eerste kick
+    // --- VERNIEUWDE KICK DETECTIE (Strakker op de Beat) ---
     function findFirstKick(audioBuffer) {
         const data = audioBuffer.getChannelData(0);
         let maxPeak = 0;
-        const scanLimit = Math.min(data.length, audioBuffer.sampleRate * 10);
-        for (let i = 0; i < scanLimit; i += 100) { if (data[i] > maxPeak) maxPeak = data[i]; }
+        
+        // Scan de eerste 5 seconden om de hoogste piek te vinden
+        const scanLimit = Math.min(data.length, audioBuffer.sampleRate * 5);
+        for (let i = 0; i < scanLimit; i += 50) { 
+            if (Math.abs(data[i]) > maxPeak) maxPeak = Math.abs(data[i]); 
+        }
+        
+        // Verlaagde drempel om het allereerste begin van de kick (de attack) te vangen
+        const threshold = maxPeak * 0.4; 
         
         for (let i = 0; i < scanLimit; i++) {
-            if (data[i] > maxPeak * 0.7) return i / audioBuffer.sampleRate;
+            if (Math.abs(data[i]) > threshold) {
+                // Ga 30 milliseconden (0.03s) terug zodat de drum niet 'afgekapt' klinkt
+                let exactStart = (i / audioBuffer.sampleRate) - 0.03;
+                return Math.max(0, exactStart);
+            }
         }
         return 0;
     }
@@ -433,7 +448,7 @@
     function loadToDeck(deckNum, trackObj) {
         const audio = document.getElementById('audio' + deckNum);
         audio.pause();
-        document.getElementById('play' + deckNum).classList.remove('active');
+        document.getElementById('play' + deckNum + 'Btn').classList.remove('active');
         
         const fader = document.getElementById('pitch' + deckNum);
         fader.value = 1;
@@ -453,14 +468,17 @@
     [1, 2].forEach(deck => {
         const fader = document.getElementById('pitch' + deck);
         
+        // Input event vuurt continu tijdens het schuiven (Realtime)
         fader.addEventListener('input', function(e) {
             let val = parseFloat(e.target.value);
-            // Klik vast op 0 
-            if (val > 0.998 && val < 1.002) val = 1;
+            if (val > 0.998 && val < 1.002) val = 1; // Snapt vast op precies nul
             fader.value = val;
             
             const audio = document.getElementById('audio' + deck);
-            audio.playbackRate = val;
+            // Zolang er een src is ingesteld updatet hij live de snelheid zonder te pauzeren!
+            if(audio.src) {
+                audio.playbackRate = val;
+            }
             updatePitchDisplay(deck, val);
         });
         
@@ -471,7 +489,7 @@
         });
         
         document.getElementById('audio' + deck).addEventListener('ended', () => {
-            document.getElementById('play' + deck).classList.remove('active');
+            document.getElementById('play' + deck + 'Btn').classList.remove('active');
         });
     });
 
@@ -486,7 +504,7 @@
 
     function togglePlay(deck) {
         const audio = document.getElementById('audio' + deck);
-        const btn = document.getElementById('play' + deck);
+        const btn = document.getElementById('play' + deck + 'Btn');
         if (!audio.src) return;
         
         if (audio.paused) {
@@ -500,7 +518,7 @@
 
     function handleCue(deck) {
         const audio = document.getElementById('audio' + deck);
-        const btnPlay = document.getElementById('play' + deck);
+        const btnPlay = document.getElementById('play' + deck + 'Btn');
         if (!audio.src) return;
         
         audio.pause();
@@ -508,10 +526,8 @@
         audio.currentTime = deckData[deck].firstKick; 
     }
 
-    // --- BPM CONTROLE ---
     function checkBPM() {
         const modal = document.getElementById('bpmModal');
-        
         [1, 2].forEach(deck => {
             const faderVal = parseFloat(document.getElementById('pitch' + deck).value);
             const origBPM = deckData[deck].bpm;
@@ -526,9 +542,37 @@
                 document.getElementById('checkCur' + deck).innerText = '--';
             }
         });
-        
         modal.style.display = 'flex';
     }
+
+    // --- MULTITOUCH ACTIVERING (Directe Vinger-Reactie) ---
+    // Deze functie vervangt de oude 'onclick' zodat we met meerdere vingers tegelijk op de iPhone kunnen drukken.
+    function bindMultiTouch(id, actionCallback) {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        
+        // Speciaal voor telefoons, voorkomt ghost-clicks en laat alles direct reageren
+        const handler = function(e) {
+            e.preventDefault(); 
+            actionCallback();
+        };
+
+        btn.addEventListener('touchstart', handler, {passive: false});
+        btn.addEventListener('mousedown', handler); // Voor als je de app nog op desktop test
+    }
+
+    // Koppel alle knoppen zodra de pagina is geladen
+    document.addEventListener("DOMContentLoaded", () => {
+        bindMultiTouch('play1Btn', () => togglePlay(1));
+        bindMultiTouch('cue1Btn', () => handleCue(1));
+        bindMultiTouch('play2Btn', () => togglePlay(2));
+        bindMultiTouch('cue2Btn', () => handleCue(2));
+        bindMultiTouch('shuffle1Btn', () => shuffleDeck(1));
+        bindMultiTouch('shuffle2Btn', () => shuffleDeck(2));
+        bindMultiTouch('shuffleAllBtn', () => shuffleAll());
+        bindMultiTouch('checkBpmBtn', () => checkBPM());
+        bindMultiTouch('closeBpmBtn', () => { document.getElementById('bpmModal').style.display='none'; });
+    });
 
 </script>
 </body>
